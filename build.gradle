@@ -1,0 +1,121 @@
+buildscript {
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://jcenter.bintray.com" }
+    }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.2.RELEASE")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.31"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:1.3.31"
+        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.2"
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://jcenter.bintray.com" }
+}
+
+group "my.app1"
+
+//def microservices = subprojects.findAll { (it.name in ['graphql-server']) }
+
+//configure(microservices) { subproject ->
+
+    apply plugin: 'application'
+    apply plugin: 'groovy'
+
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: "org.jetbrains.kotlin.plugin.allopen"
+    apply plugin: "org.jetbrains.kotlin.jvm"
+    apply plugin: "org.jetbrains.kotlin.kapt"
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    dependencyManagement {
+        imports {
+            mavenBom 'io.micronaut:micronaut-bom:1.2.0'
+        }
+        dependencies {
+            dependency "io.micronaut.graphql:micronaut-graphql:1.2.0"
+            dependency "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+            dependency "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+            dependency "ch.qos.logback:logback-classic:1.2.3"
+            dependency "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.4.1"
+            dependency "ch.qos.logback:logback-classic:1.2.3"
+            dependency "org.hamcrest:hamcrest-all:1.3"
+            dependency "net.logstash.logback:logstash-logback-encoder:5.1"
+        }
+    }
+
+
+    dependencies {
+        compile "io.micronaut.graphql:micronaut-graphql"
+        compile "io.micronaut:micronaut-http-client"
+        compile "io.micronaut:micronaut-http-server-netty"
+        compile "io.micronaut:micronaut-runtime"
+        compile "io.micronaut:micronaut-management"
+        compile "io.micronaut:micronaut-discovery-client"
+        compile "io.micronaut.configuration:micronaut-micrometer-core"
+        compile "io.micronaut.configuration:micronaut-micrometer-registry-prometheus"
+        kapt "io.micronaut:micronaut-inject-java"
+        kapt "io.micronaut:micronaut-validation"
+
+        // Kotlin
+        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        compile "org.jetbrains.kotlin:kotlin-reflect"
+
+        compile "io.projectreactor:reactor-core"
+
+        runtime "ch.qos.logback:logback-classic"
+        runtime "com.fasterxml.jackson.module:jackson-module-kotlin"
+
+        testCompile "io.micronaut.test:micronaut-test-spock"
+        testCompile "io.micronaut:micronaut-inject-java"
+        testCompile "io.micronaut:micronaut-inject-groovy"
+        testCompile "io.micronaut:micronaut-runtime-groovy"
+        testCompile "io.micronaut:micronaut-validation"
+
+        testRuntime "ch.qos.logback:logback-classic"
+        testCompile("org.spockframework:spock-core") {
+            exclude group: "org.codehaus.groovy", module: "groovy-all"
+        }
+        testCompile "org.hamcrest:hamcrest-all"
+    }
+
+    shadowJar {
+        mergeServiceFiles()
+        archiveName = "service-${version}.jar"
+    }
+
+    jar {
+        enabled = true
+        archiveName = "service-${version}.jar"
+    }
+
+    run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1')
+
+    mainClassName = "my.app1.Application"
+
+    allOpen {
+        annotation("io.micronaut.aop.Around")
+    }
+
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = '1.8'
+            javaParameters = true
+        }
+    }
+
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = '1.8'
+            javaParameters = true
+        }
+    }
+
+//}

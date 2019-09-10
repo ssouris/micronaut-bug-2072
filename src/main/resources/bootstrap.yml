@@ -1,0 +1,11 @@
+micronaut:
+  application:
+    name: my-app1
+  config-client:
+    enabled: true
+
+spring:
+  cloud:
+    config:
+      enabled: true
+      uri: https://inside.bootstap.properties:8080
